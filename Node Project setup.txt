@@ -1,0 +1,321 @@
+-----------------
+Project Setup :
+-----------------
+	Reference for :
+		
+		1.	Crteate node project
+		2.	Install Express
+		3.	Create Server
+		4.	Basic Routing
+		5.	Serve Static Files
+
+		Point 1 to 5 Reference :
+			https://blog.vanila.io/setup-basic-server-with-express-framework-37b2ec749a6d
+
+--------------------------
+	Crteate node project :
+--------------------------
+
+	1.	Create project directory
+	2.	Open directory in command prompt
+	3.	run command "npm init"
+	4.	after run command terminal will ask about some details, simply press enter, enter and go to end
+	5.	open project directory, now you will saw a file "package.json"
+	6.	open package.json file and add "server.js" as entry point in front of field "main"
+		
+		{
+		  "name": "heroapp",
+		  "version": "1.0.0",
+		  "description": "hero crud app",
+		  "main": "server.js",
+		  "scripts": {
+		    "test": "echo \"Error: no test specified\" && exit 1"
+		  },
+		  "author": "avi",
+		  "license": "ISC"
+		}
+
+	Note: Entry point is the part of the application from where Express JS application bootstrapped.
+
+
+-----------------------
+	Install Express :
+-----------------------
+	1.	By the use of below command you install the express.js into your project . This command is run by
+		npm(node package manager).
+
+		command :
+					npm install express --save
+
+
+-----------------------
+	Create Server :
+-----------------------
+
+	1.	Import express in your project by require command like below
+
+			const express = require('express');
+
+	2.	Define the port number where the server listens.
+
+			const port = 3000;
+
+	3.	Create app level object of Express JS
+
+			const app = express();
+
+	4.	At last, write the 3 line of code of listening to the server on 3000 port by below code of snippet.
+
+			app.listen(port, function () {
+				console.log("Server is running on "+ port +" port");
+			});
+
+	5.	Last step to run the server is
+
+			node server.js
+
+				OR
+
+			nodemon server.js
+
+
+		Note :
+				The major difference between the node and nodemon command is that if you use node command you manually run the command each time after save or if you use nodemon command it detects the changes automatically after saving any file of the project.
+
+
+---------------------
+	Basic Routing :
+---------------------
+
+	In the server side routing, each route has one route method, one route path or URI and one or more route handler functions.
+
+
+	app.get('/', function (req, res) {
+		res.send('<h1>Hello World!</h1>')
+	})
+
+	1.	app is an instance of express.
+	2.	get is the method of HTTP request.
+	3.	’/' is the path of routing.
+	4.	function is the handler function of routing of express.
+
+
+-------------------------
+	Serve Static Files :
+-------------------------
+	*	Serving the static files is another common task of any server. In Express, we can serve static files like images, CSS, JS files by the use of express.static .
+		
+			express.static(root, [options]);
+
+	*	The root argument takes the root directory from which you serve the static stuffs of the application like images, CSS files, JS files etc.
+	
+			app.use(express.static('public'));
+
+	*	You can access the static files on browser
+
+			http://localhost:3000/images/img_name.extensionname
+
+
+Below's Reference :
+
+	https://medium.com/@vsvaibhav2016/create-crud-application-in-express-js-9b88a5a94299
+	
+-------------------
+Project Structure:
+-------------------
+	project structure will be lokks like following :
+
+		api
+			heros
+				heros.controller.js
+				heros.dao.js
+				heros.model.js
+				heros.routes.js
+		config
+			database.js
+			properties.js
+		node_modules
+		package-lock.json
+		package.json
+		server.js
+
+
+----------------------------
+Create properties.js file :
+----------------------------
+
+		module.exports = {
+		    PORT : 4000,
+		    DB : 'mongodb://localhost:27017/crud-mean',
+		}
+
+
+		Note:
+				In the properties.js file, we define the port number in which the server is listening and define the URL of MongoDB, it is used for connecting backend code with the database.
+
+----------------------------------------
+	Create database connectivity file :
+----------------------------------------
+
+	This file holds the code of database connectivity.
+
+	---------
+	  Code :
+	---------
+
+		//require mongoose module
+		var mongoose = require('mongoose');
+
+		//require chalk module to give colors to console text
+		var chalk = require('chalk');
+
+		//require database URL from properties file
+		var dbURL = require('./properties').DB;
+
+		var connected = chalk.bold.cyan;
+		var error = chalk.bold.yellow;
+		var disconnected = chalk.bold.red;
+		var termination = chalk.bold.magenta;
+
+		//export this function and imported by server.js
+		module.exports =function(){
+
+		    mongoose.connect(dbURL);
+
+		    mongoose.connection.on('connected', function(){
+		        console.log(connected("Mongoose default connection is open to ", dbURL));
+		    });
+
+		    mongoose.connection.on('error', function(err){
+		        console.log(error("Mongoose default connection has occured "+err+" error"));
+		    });
+
+		    mongoose.connection.on('disconnected', function(){
+		        console.log(disconnected("Mongoose default connection is disconnected"));
+		    });
+
+		    process.on('SIGINT', function(){
+		        mongoose.connection.close(function(){
+		            console.log(termination("Mongoose default connection is disconnected due to application termination"));
+		            process.exit(0)
+		        });
+		    });
+		}
+
+	-------------
+	  Describe :
+	-------------
+
+		Step 1 : 
+			In the first step, we can require the mongoose, chalk and MongoDB URL from config/properties.js. Mongoose is ODM(Object Document Model) for Node.js and we require to chalk for giving colors to text on console and properties.js for getting DB URL.
+				var mongoose = require('mongoose');
+				var chalk = require('chalk');
+				var dbURL = require('./properties').DB;
+		
+		Step 2 : 
+			After that, we declare the chalk variable depends upon various connections like connected, disconnected, terminated etc.
+			
+			var connected = chalk.bold.cyan;
+			var error = chalk.bold.yellow;
+			var disconnected = chalk.bold.red;
+			var termination = chalk.bold.magenta;
+
+		Step 3 :
+			In this step, we create a connection function. In this function, we can use mongoose.connect( ) function for connecting the MongoDB database and handle all the events like connected, error, disconnected and terminated.
+
+
+------------------------------
+	Create a server.js file :
+------------------------------
+
+	var express = require('express');
+	var properties = require('./config/properties');
+	var db = require('./config/database');
+	var app = express();
+
+	// call the database connectivity function
+	db();
+
+	app.listen(properties.PORT, (req, res) => {
+	    console.log(`Server is running on ${properties.PORT} port.`);
+	})
+
+
+---------------------------------------------------------------------
+	Install some require packages according to used in above codes :
+---------------------------------------------------------------------
+
+	1.	npm install mongoose
+	2.	npm install chalk
+
+-----------------------------------------
+	Start a server by below command : :
+-----------------------------------------
+
+	node server.js
+
+------------------------
+Creating Heros Model :
+------------------------
+	In this file, we create a schema of Heros by the use of mongoose.schema. The schema is the organisation of data as a blueprint of how the database is constructed. In this schema, we create a blueprint of Hero which having name and description.
+
+	--------------
+		Code :
+	--------------
+		var mongoose = require('mongoose');
+		var Schema = mongoose.Schema;
+		var herosSchema = new Schema({
+		    name :{
+		        type: String,
+		        unique : false,
+		        required : true
+		    },
+		    description : {
+		        type: String,
+		        unique : false,
+		        required : true
+		    }
+		}, {
+		    timestamps: true
+		});
+
+		module.exports = herosSchema;
+
+
+	---------------
+		Describe :
+	---------------
+
+		Step 1	:
+			In this step, we require the mongoose package.
+			
+				var mongoose = require('mongoose');
+		
+		Step 2	:
+			Everything in Mongoose starts with a Schema. Each schema maps to a MongoDB collection and defines the shape of the documents within that collection.
+		
+				var Schema = mongoose.Schema;
+		
+		Step 3	:
+			After that, we define the Schema( structure of document/data) in MongoDB by the use of mongoose.Schema.
+		
+			var herosSchema = new Schema({
+				name :{
+		            type: String,
+		            unique : false,
+		            required : true
+		        },
+		        description : {
+		            type: String,
+		            unique : false,
+		            required : true
+		        }
+		      	}, {
+		            timestamps: true
+		        }
+		    );
+
+		Step 4	:
+			In the last step, we export the schema and later importing in dao file.
+		
+				module.exports = herosSchema;
