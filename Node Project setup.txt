@@ -3,7 +3,7 @@ Project Setup :
 -----------------
 	Reference for :
 		
-		1.	Crteate node project
+		1.	Create node project
 		2.	Install Express
 		3.	Create Server
 		4.	Basic Routing
